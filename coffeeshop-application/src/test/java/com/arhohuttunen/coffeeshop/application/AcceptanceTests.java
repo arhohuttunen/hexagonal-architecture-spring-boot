@@ -3,28 +3,21 @@ package com.arhohuttunen.coffeeshop.application;
 import com.arhohuttunen.coffeeshop.application.in.OrderingCoffee;
 import com.arhohuttunen.coffeeshop.application.in.PreparingCoffee;
 import com.arhohuttunen.coffeeshop.application.order.LineItem;
-import com.arhohuttunen.coffeeshop.application.order.Order;
 import com.arhohuttunen.coffeeshop.application.out.OrderNotFound;
 import com.arhohuttunen.coffeeshop.application.out.Orders;
 import com.arhohuttunen.coffeeshop.application.out.Payments;
 import com.arhohuttunen.coffeeshop.application.out.stub.InMemoryOrders;
 import com.arhohuttunen.coffeeshop.application.out.stub.InMemoryPayments;
-import com.arhohuttunen.coffeeshop.shared.Drink;
-import com.arhohuttunen.coffeeshop.shared.Location;
-import com.arhohuttunen.coffeeshop.shared.Milk;
-import com.arhohuttunen.coffeeshop.shared.Size;
-import com.arhohuttunen.coffeeshop.shared.Status;
+import com.arhohuttunen.coffeeshop.shared.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.arhohuttunen.coffeeshop.application.order.OrderTestFactory.aPaidOrder;
-import static com.arhohuttunen.coffeeshop.application.order.OrderTestFactory.aReadyOrder;
-import static com.arhohuttunen.coffeeshop.application.order.OrderTestFactory.anOrder;
-import static com.arhohuttunen.coffeeshop.application.order.OrderTestFactory.anOrderInPreparation;
+import static com.arhohuttunen.coffeeshop.application.order.OrderTestFactory.*;
 import static com.arhohuttunen.coffeeshop.application.payment.CreditCardTestFactory.aCreditCard;
 import static com.arhohuttunen.coffeeshop.application.payment.PaymentTestFactory.aPaymentForOrder;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -44,9 +37,9 @@ class AcceptanceTests {
 
     @Test
     void customerCanOrderCoffee() {
-        var orderToMake = new Order(Location.IN_STORE, List.of(new LineItem(Drink.CAPPUCCINO, Milk.SKIMMED, Size.SMALL, 1)));
+        var orderItems = List.of(new LineItem(Drink.CAPPUCCINO, Milk.SKIMMED, Size.SMALL, 1));
 
-        var order = customer.placeOrder(orderToMake);
+        var order = customer.placeOrder(Location.IN_STORE, orderItems);
 
         assertThat(order.getLocation()).isEqualTo(Location.IN_STORE);
         assertThat(order.getItems()).containsExactly(new LineItem(Drink.CAPPUCCINO, Milk.SKIMMED, Size.SMALL, 1));
@@ -55,11 +48,11 @@ class AcceptanceTests {
 
     @Test
     void customerCanUpdateTheOrderBeforePaying() {
-        var orderWithOneItem = new Order(Location.TAKE_AWAY, List.of(new LineItem(Drink.LATTE, Milk.WHOLE, Size.LARGE, 1)));
-        var orderWithTwoItems = new Order(Location.TAKE_AWAY, List.of(new LineItem(Drink.LATTE, Milk.WHOLE, Size.LARGE, 2)));
+        var oneItem = List.of(new LineItem(Drink.LATTE, Milk.WHOLE, Size.LARGE, 1));
+        var twoItems = List.of(new LineItem(Drink.LATTE, Milk.WHOLE, Size.LARGE, 2));
 
-        var order = customer.placeOrder(orderWithOneItem);
-        var updatedOrder = customer.updateOrder(order.getId(), orderWithTwoItems);
+        var order = customer.placeOrder(Location.TAKE_AWAY, oneItem);
+        var updatedOrder = customer.updateOrder(order.getId(), Location.TAKE_AWAY, twoItems);
 
         assertThat(updatedOrder.getItems()).containsExactly(new LineItem(Drink.LATTE, Milk.WHOLE, Size.LARGE, 2));
     }
@@ -89,7 +82,7 @@ class AcceptanceTests {
     void noChangesAllowedWhenOrderIsPaid() {
         var existingOrder = orders.save(aPaidOrder());
 
-        assertThatThrownBy(() -> customer.updateOrder(existingOrder.getId(), anOrder())).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> customer.updateOrder(existingOrder.getId(), Location.TAKE_AWAY, emptyList())).isInstanceOf(IllegalStateException.class);
     }
 
     @Test

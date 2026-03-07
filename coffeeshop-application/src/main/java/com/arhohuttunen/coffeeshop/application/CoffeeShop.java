@@ -2,14 +2,17 @@ package com.arhohuttunen.coffeeshop.application;
 
 import com.arhohuttunen.architecture.UseCase;
 import com.arhohuttunen.coffeeshop.application.in.OrderingCoffee;
+import com.arhohuttunen.coffeeshop.application.order.LineItem;
 import com.arhohuttunen.coffeeshop.application.order.Order;
 import com.arhohuttunen.coffeeshop.application.out.Orders;
 import com.arhohuttunen.coffeeshop.application.out.Payments;
 import com.arhohuttunen.coffeeshop.application.payment.CreditCard;
 import com.arhohuttunen.coffeeshop.application.payment.Payment;
 import com.arhohuttunen.coffeeshop.application.payment.Receipt;
+import com.arhohuttunen.coffeeshop.shared.Location;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @UseCase
@@ -23,15 +26,15 @@ public class CoffeeShop implements OrderingCoffee {
     }
 
     @Override
-    public Order placeOrder(Order order) {
-        return orders.save(order);
+    public Order placeOrder(Location location, List<LineItem> items) {
+        return orders.save(new Order(location, items));
     }
 
     @Override
-    public Order updateOrder(UUID orderId, Order order) {
+    public Order updateOrder(UUID orderId, Location location, List<LineItem> items) {
         var existingOrder = orders.findOrderById(orderId);
 
-        return orders.save(existingOrder.update(order));
+        return orders.save(existingOrder.update(location, items));
     }
 
     @Override

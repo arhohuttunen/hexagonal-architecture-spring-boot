@@ -21,7 +21,10 @@ public class OrderController {
 
     @PostMapping("/order")
     ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest request, UriComponentsBuilder uriComponentsBuilder) {
-        var order = orderingCoffee.placeOrder(request.toDomain());
+        var order = orderingCoffee.placeOrder(
+                request.location(),
+                request.toDomainItems()
+        );
         var location = uriComponentsBuilder.path("/order/{id}")
                 .buildAndExpand(order.getId())
                 .toUri();
@@ -30,7 +33,11 @@ public class OrderController {
 
     @PostMapping("/order/{id}")
     ResponseEntity<OrderResponse> updateOrder(@PathVariable UUID id, @RequestBody OrderRequest request) {
-        var order = orderingCoffee.updateOrder(id, request.toDomain());
+        var order = orderingCoffee.updateOrder(
+                id,
+                request.location(),
+                request.toDomainItems()
+        );
         return ResponseEntity.ok(OrderResponse.fromDomain(order));
     }
 

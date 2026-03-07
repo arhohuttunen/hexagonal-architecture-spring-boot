@@ -50,11 +50,11 @@ public class Order {
         return items.stream().map(LineItem::getCost).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
     }
 
-    public Order update(Order order) {
+    public Order update(Location location, List<LineItem> items) {
         if (status == Status.PAID) {
             throw new IllegalStateException("Order is already paid");
         }
-        return new Order(id, order.getLocation(), order.getItems(), status);
+        return new Order(id, location, items, status);
     }
 
     public Order markPaid() {
