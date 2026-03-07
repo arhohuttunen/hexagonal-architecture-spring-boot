@@ -11,7 +11,7 @@ public record LineItem(Drink drink, Milk milk, Size size, int quantity) {
     BigDecimal getCost() {
         var price = BigDecimal.valueOf(4.0);
         if (size == Size.LARGE) {
-            price = price.add(BigDecimal.ONE);
+            price = BigDecimal.valueOf(5.0);
         }
         return price.multiply(BigDecimal.valueOf(quantity));
     }
